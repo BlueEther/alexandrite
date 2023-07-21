@@ -18,7 +18,7 @@
 
 <h1 class="mb-0">Search</h1>
 
-<form method="GET" data-sveltekit-replacestate>
+<form method="GET" use:navigateOnChange>
 	<section>
 		<Stack gap={4} align="center" cl="py-4" dir="r">
 			<TextInput value={data.query.q} name="q">Search</TextInput>
@@ -43,8 +43,6 @@
 			{#if data.query.creator}
 				<input type="hidden" name="creator" value={data.query.creator} />
 			{/if}
-
-			<button class="tertiary">Go <Icon icon="chevron-right" /></button>
 		</Stack>
 	</section>
 </form>
@@ -116,6 +114,7 @@
 		personViewToContentView,
 		postViewToContentView
 	} from '$lib/content-views';
+	import { navigateOnChange } from '$lib/utils';
 
 	export let data;
 
@@ -212,14 +211,17 @@
 		}
 		loadingContent = true;
 
+		const qs = location.search;
 		const feedData = (await loader.next()).value;
-		loadingContentFailed = feedData.error;
-		endOfFeed = feedData.endOfFeed;
-		if (!feedData.error && feedData.response) {
-			cvStore.append(getContentViews(feedData.response));
-		}
+		if (qs === location.search) {
+			loadingContentFailed = feedData.error;
+			endOfFeed = feedData.endOfFeed;
+			if (!feedData.error && feedData.response) {
+				cvStore.append(getContentViews(feedData.response));
+			}
 
-		loadingContent = false;
+			loadingContent = false;
+		}
 	}
 
 	function getContentViews(data: ApiSearchRes) {

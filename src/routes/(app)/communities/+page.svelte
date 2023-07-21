@@ -3,7 +3,7 @@
 	<h1 class="px-2 mb-0">Communities</h1>
 
 	<Stack dir="r" justify="between" align="center">
-		<form method="GET" data-sveltekit-replacestate>
+		<form method="GET" use:navigateOnChange>
 			<section>
 				<Stack gap={4} align="center" cl="p-4" dir="r">
 					<ToggleGroup
@@ -16,8 +16,6 @@
 							<option value={opt.value}>{opt.label}</option>
 						{/each}
 					</select>
-
-					<button class="tertiary">Go <Icon icon="chevron-right" /></button>
 				</Stack>
 			</section>
 		</form>
@@ -47,7 +45,7 @@
 </Layout>
 
 <script lang="ts">
-	import { Stack, Icon, Layout } from 'sheodox-ui';
+	import { Stack, Layout } from 'sheodox-ui';
 	import CommunityCard from '$lib/CommunityCard.svelte';
 	import ToggleGroup from '$lib/ToggleGroup.svelte';
 	import { ListingOptions, PostSortOptions } from '$lib/feed-filters';
@@ -59,6 +57,7 @@
 	import { getLemmyClient } from '$lib/lemmy-client';
 	import { communityViewToContentView, createContentViewStore } from '$lib/content-views';
 	import ContentViewProvider from '$lib/ContentViewProvider.svelte';
+	import { navigateOnChange } from '$lib/utils';
 
 	const { client, jwt } = getLemmyClient();
 
@@ -109,16 +108,19 @@
 		}
 		loadingContent = true;
 
+		const qs = location.search;
 		const more = (await loader.next()).value;
-		loadingContentFailed = more.error;
-		endOfFeed = more.endOfFeed;
+		if (qs === location.search) {
+			loadingContentFailed = more.error;
+			endOfFeed = more.endOfFeed;
 
-		if (more.response) {
-			const newPage = more.response.filter((com) => {
-				return !loadedCommunityIds.has(com.community.id);
-			});
-			cvStore.append(newPage.map(communityViewToContentView));
+			if (more.response) {
+				const newPage = more.response.filter((com) => {
+					return !loadedCommunityIds.has(com.community.id);
+				});
+				cvStore.append(newPage.map(communityViewToContentView));
+			}
+			loadingContent = false;
 		}
-		loadingContent = false;
 	}
 </script>

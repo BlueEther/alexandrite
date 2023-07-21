@@ -1,8 +1,12 @@
-<style>
+<style lang="scss">
 	nav :global(.icon-link) {
 		display: inline-grid !important;
 		grid-template-columns: 2.5rem 1fr;
 		align-items: center;
+
+		:global(a) :global(*:first-child) {
+			width: 2.5rem;
+		}
 	}
 </style>
 
@@ -10,19 +14,28 @@
 	<nav class="sx-sidebar-simple-links">
 		<Stack dir="c" gap={1}>
 			{#each links as link}
-				<a href={link.href} class="icon-link"><Icon icon={link.icon} /><span>{link.text}</span></a>
+				<a href={link.href} class="icon-link plain-link"><Icon icon={link.icon} /><span>{link.text}</span></a>
 			{/each}
 
 			<SidebarSubscriptionList
 				title="Favorites"
-				subscriptions={favoriteCommunitiesh}
+				communities={favoriteCommunities.map((v) => v.community)}
 				favorites={$favoriteCommunitiesIds}
 				on:favorite={(e) => onFavorite(e.detail)}
 			/>
 
+			{#if siteMeta.my_user}
+				<SidebarSubscriptionList
+					title="Moderating"
+					communities={siteMeta.my_user.moderates.map((v) => v.community)}
+					favorites={$favoriteCommunitiesIds}
+					on:favorite={(e) => onFavorite(e.detail)}
+				/>
+			{/if}
+
 			<SidebarSubscriptionList
 				title="Subscriptions"
-				{subscriptions}
+				communities={subscriptions.map((v) => v.community)}
 				favorites={$favoriteCommunitiesIds}
 				on:favorite={(e) => onFavorite(e.detail)}
 			/>
@@ -39,11 +52,11 @@
 
 	export let subscriptions: CommunityFollowerView[] = [];
 
-	const { username, loggedIn } = getAppContext();
+	const { username, loggedIn, siteMeta } = getAppContext();
 
 	const favoriteCommunitiesIds = localStorageBackedStore<number[]>('favorite-communities', []);
 
-	$: favoriteCommunitiesh = subscriptions.filter((sub) => $favoriteCommunitiesIds.includes(sub.community.id));
+	$: favoriteCommunities = subscriptions.filter((sub) => $favoriteCommunitiesIds.includes(sub.community.id));
 
 	function onFavorite({ communityId, favorite }: { communityId: number; favorite: boolean }) {
 		if (favorite) {
