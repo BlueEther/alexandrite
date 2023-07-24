@@ -28,28 +28,14 @@
 			href="https://simple.wikipedia.org/wiki/Fediverse">Fediverse</ExternalLink
 		>.
 	</p>
-	<p>
-		If you're new here, first <ExternalLink href="https://join-lemmy.org/instances"
-			>find a Lemmy instance that sounds interesting to you</ExternalLink
-		> then come back here.
-	</p>
 </Stack>
-
-<Alert variant="info">
-	<Icon icon="warning" /> Alexandrite is only compatible with instances running <code>0.18.1</code> or later.
-</Alert>
 
 <form class:instance-valid={parseableInstance} on:submit|preventDefault={onSubmit}>
 	<Stack gap={2}>
 		{#if errMsg}
 			<Alert variant="error">{errMsg}</Alert>
 		{/if}
-		<TextInput
-			placeholder="Your chosen Lemmy website, e.g. lemmy.ml or lemmy.world"
-			name="instance"
-			bind:value={instance}>Instance</TextInput
-		>
-
+		
 		<div class="login-inputs f-column gap-2">
 			<Separator>Login Info (Optional)</Separator>
 			<TextInput name="username" bind:value={username}>Username or email (optional)</TextInput>
@@ -93,7 +79,7 @@
 	$: parseableInstance = parseableUrl(instance);
 	$: instanceNoProtocol = instance.replace(regUrlStart, '');
 
-	let instance = 'lemmy.world',
+	let instance = 'no.lastname.nz',
 		username = '',
 		password = '',
 		totp_2fa_token = '';
